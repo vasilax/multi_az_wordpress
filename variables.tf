@@ -35,6 +35,20 @@ variable "private_key" {
   description = "Path and filename of private key in format /path/filename.pem"
   }
 
+variable "wordpress_admin_email" {
+  description = "Email of wordpress admin"
+}
+
+variable "wordpress_admin_username" {
+  description = "Wordpress Admin Username"
+}
+
+variable "wordpress_admin_password" {
+  description = "Wordpress Admin Password"
+}
+variable "wordpress_site_title" {
+  description = "Wordpress Site Title"
+}
 
 variable "cloudfront_description" {
   description = "Cloudfront Distribution Notes"

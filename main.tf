@@ -93,6 +93,15 @@
   cidr_blocks = ["0.0.0.0/0"]
   }
 
+  # HTTP access from anywhere
+  ingress {
+  from_port   = 443
+  to_port     = 443
+  protocol    = "tcp"
+  cidr_blocks = ["0.0.0.0/0"]
+  }
+
+
  # outbound internet access
   egress {
   from_port   = 0
@@ -301,7 +310,7 @@ resource "aws_elb" "wp_elb_web" {
               "sed -i -e 's/\r$//' /tmp/install-2.sh",
               "/tmp/install-2.sh",
               "cd /var/www/html/",
-              "wp core install --url=\"${aws_elb.wp_elb_web.dns_name}\"  --title=\"test_title\" --admin_user=\"admin\" --admin_password=\"password\" --admin_email=\"vasilax@gmail.com\"",
+              "wp core install --url=\"${aws_elb.wp_elb_web.dns_name}\"  --title=\"${var.wordpress_site_title}\" --admin_user=\"${var.wordpress_admin_username}\" --admin_password=\"${var.wordpress_admin_password}\" --admin_email=\"${var.wordpress_admin_email}\"",
               "wp plugin install --activate --version=1.0 amazon-web-services",
               "wp plugin install --activate --version=1.1 amazon-s3-and-cloudfront"
               ]
