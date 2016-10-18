@@ -13,7 +13,7 @@ This terraform script creates multi AZ install of a single Wordpress site:
 - ELB
 - ELB attachement (both EC2 instances in multiple AZs)
 - Two EC2 instances in US-EAST-1 (az b and c)
-- two bash scripts installing and configuring wordpress on EC2 instances
+- two bash scripts installing and configuring wordpress on EC2 instances as well as installing additional plugins via wp-cli
 - Cloudfront Distribution with custom origin (ELB)
 - RDS DB
 
