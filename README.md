@@ -1,5 +1,5 @@
 # multi_az_wordpress
-This terraform script creates:
+This terraform script creates multi AZ install of a single Wordpress site:
 - VPC with IG, RT, 
 - Two public subnets for EC2 instances
 - Two private subnets for RDS and subnet group
