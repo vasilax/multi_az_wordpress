@@ -2,36 +2,36 @@
  provider "aws" {
     access_key = "${var.aws_access_key}"
     secret_key = "${var.aws_secret_key}"
-    region = "${var.aws_region}"
+    region     = "${var.aws_region}"
     }
 
 # Create a VPC
  resource "aws_vpc" "wp_vpc" {
    cidr_block = "${var.vpc_cidr}"
-   tags {
-        Name = "${var.environment}-vpc"
+    tags {
+      Name = "${var.environment}-vpc"
     }
   }
 
 # Create an internet gateway to give our public subnets access to the outside world
  resource "aws_internet_gateway" "wp_ig" {
-    vpc_id = "${aws_vpc.wp_vpc.id}"
+   vpc_id = "${aws_vpc.wp_vpc.id}"
     tags {
-        Name = "${var.environment}-ig"
+      Name = "${var.environment}-ig"
     }
   }
 
 # Grant the VPC internet access on its main route table
-  resource "aws_route" "internet_access" {
+ resource "aws_route" "internet_access" {
    route_table_id         = "${aws_vpc.wp_vpc.main_route_table_id}"
    destination_cidr_block = "0.0.0.0/0"
    gateway_id             = "${aws_internet_gateway.wp_ig.id}"
   }
 
 # Create private subnet in US East (1B) to launch RDS
-  resource "aws_subnet" "rds-backend-1b" {
+ resource "aws_subnet" "rds-backend-1b" {
    vpc_id                  = "${aws_vpc.wp_vpc.id}"
-   cidr_block              = "10.0.5.0/24"
+   cidr_block              = "${var.rds_backend_1b}"
    availability_zone       = "us-east-1b"
    map_public_ip_on_launch = false
     tags {
@@ -39,9 +39,9 @@
       }
     }
 # Create private subnet in US East (1C) to launch RDS
-  resource "aws_subnet" "rds-backend-1c" {
+ resource "aws_subnet" "rds-backend-1c" {
    vpc_id                  = "${aws_vpc.wp_vpc.id}"
-   cidr_block              = "10.0.4.0/24"
+   cidr_block              = "${var.rds_backend_1c}"
    availability_zone       = "us-east-1c"
    map_public_ip_on_launch = false
     tags {
@@ -50,10 +50,10 @@
   }
 
 # Create RDS DB Subnet group
-  resource "aws_db_subnet_group" "rds_subnet_group" {
+ resource "aws_db_subnet_group" "rds_subnet_group" {
    name = "${var.environment}-rds-subnet-group"
    subnet_ids = ["${aws_subnet.rds-backend-1b.id}","${aws_subnet.rds-backend-1c.id}" ]
-     tags {
+    tags {
           Name = "${var.environment}-rds-subnet-group"
       }
   }
@@ -61,18 +61,18 @@
 # Create public subnet in US East (1B) to launch EC2 instance
  resource "aws_subnet" "wp-us-east-1b" {
   vpc_id                  = "${aws_vpc.wp_vpc.id}"
-  cidr_block              = "10.0.1.0/24"
+  cidr_block              = "${var.wp_us_east_1b}"
   availability_zone       = "us-east-1b"
   map_public_ip_on_launch = true
-     tags {
+    tags {
         Name = "${var.environment}-us-east-1b"
      }
   }
 
 # Create public subnet in US East (1C) to launch instance into
-  resource "aws_subnet" "wp-us-east-1c" {
+ resource "aws_subnet" "wp-us-east-1c" {
   vpc_id                  = "${aws_vpc.wp_vpc.id}"
-  cidr_block              = "10.0.2.0/24"
+  cidr_block              = "${var.wp_us_east_1c}"
   availability_zone       = "us-east-1c"
   map_public_ip_on_launch = true
     tags {
@@ -81,7 +81,7 @@
   }
 
 # A security group for the ELB so it is accessible via the web
-  resource "aws_security_group" "wp_elb" {
+ resource "aws_security_group" "wp_elb" {
    name        = "wp_elb"
    vpc_id      = "${aws_vpc.wp_vpc.id}"
 
@@ -141,11 +141,11 @@
 }
 
 // Security group for RDS
-resource "aws_security_group" "wp_rds_sg" {
+ resource "aws_security_group" "wp_rds_sg" {
    name = "${var.environment}-rds-sg"
    description = "wp-${var.environment}-rds-sg"
    vpc_id = "${aws_vpc.wp_vpc.id}"
-      tags {
+    tags {
          Name = "${var.environment}-rds-sg"
          Environment =  "${var.environment}"
   }
@@ -208,7 +208,7 @@ EOF
 }
 
 // IAM Role for ec2 to access S3 shared bucket
-resource "aws_iam_role" "iam_role" {
+ resource "aws_iam_role" "iam_role" {
   name = "${var.iam_role}"
   assume_role_policy = <<EOF
 {
@@ -228,23 +228,23 @@ EOF
 }
 
 //IAM EC2 Instance profile
-resource "aws_iam_instance_profile" "web_instance_profile" {
-   name = "${var.environment}"
+ resource "aws_iam_instance_profile" "web_instance_profile" {
+   name  = "${var.environment}"
    roles = ["${var.iam_role}"]
   }
 
 //CREATE S3 BUCKET
-resource "aws_s3_bucket" "wp_bucket" {
+ resource "aws_s3_bucket" "wp_bucket" {
     bucket = "${var.wp_bucket_name}"
     acl = "private"
 }
 
 // Elastic Load Balancer
-resource "aws_elb" "wp_elb_web" {
- name = "wp-elb-web"
- subnets                   = ["${aws_subnet.wp-us-east-1b.id}","${aws_subnet.wp-us-east-1c.id}"]
- security_groups           = ["${aws_security_group.wp_elb.id}"]
- cross_zone_load_balancing = true
+ resource "aws_elb" "wp_elb_web" {
+  name                      = "wp-elb-web"
+  subnets                   = ["${aws_subnet.wp-us-east-1b.id}","${aws_subnet.wp-us-east-1c.id}"]
+  security_groups           = ["${aws_security_group.wp_elb.id}"]
+  cross_zone_load_balancing = true
 
  listener {
  instance_port     = 80
@@ -269,7 +269,7 @@ resource "aws_elb" "wp_elb_web" {
  resource "aws_instance" "web_us_east_1b" {
   depends_on = ["aws_db_instance.wp-rds"]
   depends_on = ["aws_elb.wp_elb_web"]
-    tags {
+     tags {
         Name = "${var.environment}-01"
     }
     connection {
@@ -277,11 +277,11 @@ resource "aws_elb" "wp_elb_web" {
       private_key = "${file(var.private_key)}"
     }
       instance_type = "t2.micro"
-      ami = "${lookup(var.aws_amis, var.aws_region)}"
-      key_name = "${var.key_name}"
+      ami                    = "${lookup(var.aws_amis, var.aws_region)}"
+      key_name               = "${var.key_name}"
       vpc_security_group_ids = ["${aws_security_group.wp_ssh_http.id}"]
-      subnet_id = "${aws_subnet.wp-us-east-1b.id}"
-      iam_instance_profile = "${aws_iam_instance_profile.web_instance_profile.id}"
+      subnet_id              = "${aws_subnet.wp-us-east-1b.id}"
+      iam_instance_profile   = "${aws_iam_instance_profile.web_instance_profile.id}"
           provisioner "file" {
             source = "scripts/install-1.sh"
             destination = "/tmp/install-1.sh"
@@ -329,11 +329,11 @@ resource "aws_instance" "web_us_east_1c" {
       private_key = "${file(var.private_key)}"
     }
    instance_type = "t2.micro"
-   ami = "${lookup(var.aws_amis, var.aws_region)}"
-   key_name = "${var.key_name}"
+   ami                    = "${lookup(var.aws_amis, var.aws_region)}"
+   key_name               = "${var.key_name}"
    vpc_security_group_ids = ["${aws_security_group.wp_ssh_http.id}"]
-   subnet_id = "${aws_subnet.wp-us-east-1c.id}"
-   iam_instance_profile = "${aws_iam_instance_profile.web_instance_profile.id}"
+   subnet_id              = "${aws_subnet.wp-us-east-1c.id}"
+   iam_instance_profile   = "${aws_iam_instance_profile.web_instance_profile.id}"
       provisioner "file" {
         source = "scripts/install-1.sh"
         destination = "/tmp/install-1.sh"
@@ -377,8 +377,8 @@ resource "aws_cloudfront_distribution" "cloudfront_distribution" {
     origin_id   = "${aws_elb.wp_elb_web.id}"
 
   custom_origin_config {
-    http_port   = "80"
-    https_port  = "443"
+    http_port              = "80"
+    https_port             = "443"
     origin_protocol_policy = "match-viewer"
     origin_ssl_protocols   = ["SSLv3", "TLSv1","TLSv1.1","TLSv1.2"]
   }
@@ -400,9 +400,9 @@ resource "aws_cloudfront_distribution" "cloudfront_distribution" {
     }
   }
   viewer_protocol_policy = "allow-all"
-  min_ttl                = 0
-  default_ttl            = 3600
-  max_ttl                = 86400
+  min_ttl      = 0
+  default_ttl  = 3600
+  max_ttl      = 86400
   }
 
   price_class = "PriceClass_200"

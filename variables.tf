@@ -11,6 +11,22 @@ variable "vpc_cidr" {
   default = "10.0.0.0/16"
 }
 
+variable "rds_backend_1b" {
+  default = "10.0.5.0/24"
+}
+
+variable "rds_backend_1c" {
+  default = "10.0.4.0/24"
+}
+
+variable "wp_us_east_1b" {
+  default = "10.0.1.0/24"
+}
+
+variable "wp_us_east_1c" {
+  default = "10.0.2.0/24"
+}
+
 variable "key_name" {
     description = "Name of AWS key pair"
     }
