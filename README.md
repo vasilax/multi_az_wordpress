@@ -18,9 +18,10 @@ This terraform script creates multi AZ install of a single Wordpress site:
 - RDS DB
 
 
-Manual work to do:
-Before tf apply  - Create Key Pair and download a private key locally
-After tf apply log to wordpress admin /wp-admin directory, and add S3 bucket name to the AWS plugin.
+Sequence:
+- Create Key Pair and download the private key locally
+- After tf apply, log to wordpress admin ("/wp-admin"), and add s3 bucket name to the AWS plugin.
+
 
 
 
