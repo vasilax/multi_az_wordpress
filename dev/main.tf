@@ -14,7 +14,7 @@
   }
 
 # Create an internet gateway to give our public subnets access to the outside world
- resource "aws_internet_gateway" "wp_ig" {
+ resource "aws_internet_gateway" "wp_igw" {
    vpc_id = "${aws_vpc.wp_vpc.id}"
     tags {
       Name = "${var.environment}-ig"
