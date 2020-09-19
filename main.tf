@@ -112,7 +112,7 @@
 }
 
 # Security group to access the instances over SSH and HTTP
- resource "aws_security_group" "wp_ssh_http" {
+ resource "aws_security_group" "wp_ssh_https" {
   name        = "wp_public_sg"
   vpc_id      = "${aws_vpc.wp_vpc.id}"
 
