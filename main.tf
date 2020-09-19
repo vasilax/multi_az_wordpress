@@ -54,7 +54,7 @@
    name = "${var.environment}-rds-subnet-group"
    subnet_ids = ["${aws_subnet.rds-backend-1b.id}","${aws_subnet.rds-backend-1c.id}" ]
     tags {
-          Name = "${var.environment}-rds-subnet-group"
+          Name = "${var.environment}-rds-subnet-groups"
       }
   }
 
