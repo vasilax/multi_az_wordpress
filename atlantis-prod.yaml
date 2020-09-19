@@ -1,0 +1,4 @@
+version: 3
+projects:
+- dir: prod
+  terraform_version: 0.13.3
