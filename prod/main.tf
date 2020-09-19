@@ -6,7 +6,7 @@
     }
 
 # Create a VPC
- resource "aws_vpc" "wp_vpc" {
+ resource "aws_vpc" "wp_vpcc" {
    cidr_block = "${var.vpc_cidr}"
     tags {
       Name = "${var.environment}-vpc"
