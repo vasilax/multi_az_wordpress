@@ -38,7 +38,7 @@
           Name = "${var.environment}-rds-1b"
       }
     }
-# Create private subnet in US East (1C) to launch RDS
+# Create private subnet in US East (1C) to launch RDS.
  resource "aws_subnet" "rds-backend-1c" {
    vpc_id                  = "${aws_vpc.wp_vpc.id}"
    cidr_block              = "${var.rds_backend_1c}"
